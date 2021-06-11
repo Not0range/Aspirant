@@ -1,0 +1,18 @@
+﻿@page
+@model WebServer.Pages.IndexModel
+@{
+    ViewBag.Title = "Главная";
+    Layout = "_Layout";
+}
+
+<div>
+    @if(!User.Identity.IsAuthenticated)
+    {
+        <h3>Вы не авторизированы</h3>
+    }
+    else
+    {
+        <h3>Вы авторизированы</h3>
+    }
+</div>
+

@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="~/css/boxicons.css" rel="stylesheet" />
+
+    <link href="~/css/PrimeVueTheme.css" rel="stylesheet" />
+
+    <link href="~/css/primevue.min.css" rel="stylesheet" />
+    <link href="~/css/primeicons.css" rel="stylesheet" />
+
+    <script src="~/scripts/vue.global.js"></script>
+    <script src="~/scripts/primevue_component/api.js"></script>
+    <script src="~/scripts/primevue_component/utils.js"></script>
+    <script src="~/scripts/primevue_component/config.js"></script>
+    <script src="~/scripts/primevue_component/ripple.js"></script>
+
+    <script src="~/scripts/primevue_component/inputtext.js"></script>
+    <script src="~/scripts/primevue_component/password.js"></script>
+    <script src="~/scripts/primevue_component/button.js"></script>
+    <script src="~/scripts/primevue_component/sidebar.js"></script>
+    <script src="~/scripts/primevue_component/dialog.js"></script>
+
+    <style>
+        body {
+            margin: 0px;
+        }
+
+        #left-menu-button {
+            width: 50px;
+            height: 50px;
+            background-color: transparent;
+        }
+
+        #main-div {
+            display: grid;
+            margin: 0px;
+            grid-template-rows: 50px auto;
+            grid-template-columns: auto;
+        }
+
+        #top-menu {
+            grid-row-start: 0;
+            background-color: lightblue;
+            display: flex;
+            align-items: center;
+        }
+
+        #auth-div .p-button {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        #login-form .p-float-label,
+        #registration-form .p-float-label {
+            margin: 10px 5px 5px 5px;
+        }
+
+        #greeting{
+            margin-right: 10px;
+            display: flex;
+        }
+
+        #greeting p {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="body-div">
+        <p-side-bar v-model:visible="leftMenu">
+            <p>Здесь меню</p>
+        </p-side-bar>
+        <p-dialog header="Вход" id="login-form" v-model:visible="loginForm"
+                  :modal="true">
+            <span class="p-float-label">
+                <p-inputtext id="loginLogin" type="text" v-model="loginLogin"></p-inputtext>
+                <label for="loginLogin">Email или номер телефона</label>
+            </span>
+            <span class="p-float-label">
+                <p-password id="passwordLogin" v-model="passwordLogin" :feedback="false"></p-password>
+                <label for="passwordLogin">Пароль</label>
+            </span>
+            <p-button label="Вход" style="width: 100%; margin-top: 10px" @@click="login"></p-button>
+        </p-dialog>
+        <p-dialog id="registration-form"
+            v-model:visible="registrationForm"
+            :modal="true"
+        >
+            <h5>Тут выход</h5>
+        </p-dialog>
+        <div id="main-div">
+            <div id="top-menu">
+                <p-button id="left-menu-button"
+                          icon="bx bx-menu bx-md"
+                          @@click="leftMenu = true"
+                          @Html.Raw(!User.Identity.IsAuthenticated ? "disabled" : "")></p-button>
+                <div style="flex-grow: 1"></div>
+                <div id="auth-div" :style="{display: unauth ? '' : 'none'}">
+                    <p-button label="Вход" @@click="loginForm = true"></p-button>
+                    <p-button label="Регистрация" @@click="registrationForm = true"></p-button>
+                </div>
+                <div id="greeting" :style="{display: !unauth ? '' : 'none'}">
+                    <p>@Html.Raw(User.Identity != null ? User.Identity.Name : "")</p>
+                    <p-button label="Выход" @@click="logout"></p-button>
+                </div>
+            </div>
+
+            @RenderBody()
+        </div>
+    </div>
+    <script>
+        const App = {
+            data: () => {
+                return {
+                    message: '',
+                    leftMenu: false,
+                    unauth: @Html.Raw(User.Identity.IsAuthenticated ? "false" : "true"),
+                    loginForm: false,
+                    registrationForm: false,
+                    loginLogin: '',
+                    passwordLogin: ''
+                }
+            },
+            components: {
+                'p-inputtext': primevue.inputtext,
+                'p-password': primevue.password,
+                'p-button': primevue.button,
+                'p-side-bar': primevue.sidebar,
+                'p-dialog': primevue.dialog
+            },
+            methods: {
+                login() {
+                    fetch('/api/Account/Login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        },
+                        body: JSON.stringify({
+                            login: this.loginLogin,
+                            password: this.passwordLogin
+                        })
+                    }).then(res => {
+                        if (res.ok)
+                            window.location = window.location;
+                    });
+                },
+                logout() {
+                    fetch('/api/Account/Logout', {
+                        method: 'POST'
+                    }).then(res => {
+                        if (res.ok)
+                            window.location = window.location;
+                    });
+                }
+            }
+        };
+        let vue = Vue.createApp(App);
+        vue.use(primevue.config.default);
+        vue.mount('#body-div');
+    </script>
+</body>
+</html>
