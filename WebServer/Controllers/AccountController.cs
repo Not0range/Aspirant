@@ -14,13 +14,14 @@ using WebServer.Models;
 
 namespace WebServer.Controllers
 {
-    [EnableCors]
+    [ApiController]
+    [EnableCors("Policy")]
     public class AccountController : APIBase
     {
         public AccountController(Database.AspirantDBContext ctx) : base(ctx) { }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginInfo info)
+        public async Task<IActionResult> Login([FromBody] LoginForm info)
         {
             var user = await _ctx.Users.FirstOrDefaultAsync(u => (u.Username == info.Login || 
                 u.Email == info.Login) && u.Password == info.Password);
@@ -30,7 +31,6 @@ namespace WebServer.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Username),
                 new Claim("ID", user.UserId.ToString()),
             };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -38,7 +38,7 @@ namespace WebServer.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity), new AuthenticationProperties
                 {
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                 });
 
             return Ok();
@@ -47,15 +47,20 @@ namespace WebServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Registration([FromBody] RegistrationForm info)
         {
-            var user = await _ctx.Users.FirstOrDefaultAsync(u => (u.Username == info.PhoneNumber ||
+            var user = await _ctx.Users.FirstOrDefaultAsync(u => (u.Username == info.Username ||
                 u.Email == info.Email) && u.Password == info.Password);
 
             if (user != null)
                 return BadRequest();
-            await _ctx.Users.AddAsync(new Database.Entities.User
+            user = new Database.Entities.User
             {
+                Username = info.Username,
+                Email = info.Email,
+                Password = info.Password
+            };
+            await _ctx.Users.AddAsync(user);
+            await _ctx.SaveChangesAsync();
 
-            });
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
@@ -67,7 +72,7 @@ namespace WebServer.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity), new AuthenticationProperties
                 {
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                 });
 
             return Ok();

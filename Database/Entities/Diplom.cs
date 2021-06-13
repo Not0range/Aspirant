@@ -20,7 +20,7 @@ namespace Database.Entities
         [ForeignKey("AspirantId")]
         public Aspirant Aspirant { get; set; }
 
-        [Required, Column(TypeName = "Date")]
+        [Required, Column(TypeName = "date")]
         public DateTime EndDate { get; set; }
 
         [Required, MaxLength(50)]

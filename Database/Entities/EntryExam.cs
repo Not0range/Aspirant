@@ -20,8 +20,8 @@ namespace Database.Entities
         [ForeignKey("PersonId")]
         public Person Person { get; set; }
 
-        [Required, Column(TypeName = "Date")]
-        public DateTime date { get; set; }
+        [Required, Column(TypeName = "date")]
+        public DateTime Date { get; set; }
 
         [Required, MaxLength(50)]
         public string Subject { get; set; }

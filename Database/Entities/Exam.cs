@@ -11,6 +11,7 @@ namespace Database.Entities
     [Table("Exams")]
     public class Exam
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -19,8 +20,8 @@ namespace Database.Entities
         [ForeignKey("AspirantId")]
         public Aspirant Aspirant { get; set; }
 
-        [Required, Column(TypeName = "Date")]
-        public DateTime date { get; set; }
+        [Required, Column(TypeName = "date")]
+        public DateTime Date { get; set; }
 
         [Required]
         public ExamType ExamType { get; set; }

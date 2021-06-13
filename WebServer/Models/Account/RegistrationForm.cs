@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace WebServer.Models
 {
-    public class LoginInfo
+    public class RegistrationForm
     {
         [Required]
-        public string Login { get; set; }
+        public string Username { get; set; }
 
-        [Required]
+        [Required, RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+        public string Email { get; set; }
+
+        [Required, MaxLength(32), MinLength(6)]
         public string Password { get; set; }
     }
 }

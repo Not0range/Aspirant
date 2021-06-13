@@ -5,14 +5,31 @@
     Layout = "_Layout";
 }
 
-<div>
-    @if(!User.Identity.IsAuthenticated)
+<div class="tab-div" :style="{display: activeTab != 0 ? 'none' : ''}">
+    <h1>Чтобы воспользоваться системой «Аспирант» необходимо 
+    <span class="clickable-text" @@click="loginForm = true">войти</span>.<br />
+    У Вас нет аккаунта? <span class="clickable-text" @@click="registrationForm = true">Зарегистрируйтесь</span> сейчас</h1>
+</div>
+<div class="tab-div" :style="{display: activeTab != 1 ? 'none' : ''}">
+    <h1>Данные физического лица</h1>
+    @if (Model.Person != null)
     {
-        <h3>Вы не авторизированы</h3>
-    }
-    else
-    {
-        <h3>Вы авторизированы</h3>
+        <p>ФИО: @Html.Raw(Model.Person.Lastname + ' ' + Model.Person.Firstname + ' ' + Model.Person.Patronymic)</p>
+        <p>Дата рождения: @Html.Raw(Model.Person.Birthdate.ToString("dd.MM.yyyy"))</p>
+        <p>Гражданство: @Html.Raw(Model.Person.Citizenship)</p>
+        <p>Документ, подтверждающий личность: @Html.Raw(Model.Person.Passport)</p>
+        <p>Наличие трудовой книжки: @Html.Raw(Model.Person.Workbook ? "В наличии" : "Отсутствует")</p>
+        <p>Места работы: @Html.Raw(Model.Person.Workplaces)</p>
+        <p>Контакты: @Html.Raw(Model.Person.Contacts)</p>
+        <p>Образования: </p>
     }
 </div>
-
+<div class="tab-div" :style="{display: activeTab != 2 ? 'none' : ''}">
+    <h1>Вступительные экзамены</h1>
+</div>
+<div class="tab-div" :style="{display: activeTab != 3 ? 'none' : ''}">
+    <h1>Данные аспиранта</h1>
+</div>
+<div class="tab-div" :style="{display: activeTab != 4 ? 'none' : ''}">
+    <h1>Зачёты/экзаменыа</h1>
+</div>

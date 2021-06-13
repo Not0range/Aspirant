@@ -20,6 +20,11 @@
     <script src="~/scripts/primevue_component/button.js"></script>
     <script src="~/scripts/primevue_component/sidebar.js"></script>
     <script src="~/scripts/primevue_component/dialog.js"></script>
+    <script src="~/scripts/primevue_component/checkbox.js"></script>
+    <script src="~/scripts/primevue_component/calendar.js"></script>
+    <script src="~/scripts/primevue_component/datatable.js"></script>
+    <script src="~/scripts/primevue_component/column.js"></script>
+    <script src="~/scripts/primevue_component/fieldset.js"></script>
 
     <style>
         body {
@@ -51,31 +56,75 @@
             margin-right: 5px;
         }
 
-        #login-form .p-float-label,
-        #registration-form .p-float-label {
+        .p-float-label {
             margin: 10px 5px 5px 5px;
         }
 
-        #greeting{
+        #greeting {
             margin-right: 10px;
             display: flex;
         }
 
-        #greeting p {
-            margin-right: 10px;
+            #greeting p {
+                margin-right: 10px;
+            }
+
+        #main-content {
+            margin: 5px;
         }
+
+        .p-sidebar-content {
+            display: flex;
+            flex-direction: column
+        }
+
+        .tab-div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .clickable-text {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .menu-elem-button {
+            background-color: transparent;
+            color: black;
+            text-align: left;
+        }
+
+        .tab-div h1 {
+            text-align: center
+        }
+
+        #person-div {
+            align-items: center;
+        }
+
+            #person-div input {
+                width: 350px;
+            }
+
+            #person-div .p-datatable-table {
+                width: 500px;
+            }
     </style>
 </head>
 <body>
     <div id="body-div">
         <p-side-bar v-model:visible="leftMenu">
-            <p>Здесь меню</p>
+            <h2>Меню</h2>
+            <p-button class="menu-elem-button" label="Данные о физическом лице" @@click="switchTab(1)"></p-button>
+            <p-button class="menu-elem-button" label="Данные о вступительных экзаменах" @@click="switchTab(2)"></p-button>
+            <p-button class="menu-elem-button" label="Данные об аспиранте" @@click="switchTab(3)"></p-button>
+            <p-button class="menu-elem-button" label="Экзамены/зачёты" @@click="switchTab(4)"></p-button>
         </p-side-bar>
         <p-dialog header="Вход" id="login-form" v-model:visible="loginForm"
                   :modal="true">
             <span class="p-float-label">
                 <p-inputtext id="loginLogin" type="text" v-model="loginLogin"></p-inputtext>
-                <label for="loginLogin">Email или номер телефона</label>
+                <label for="loginLogin">Email или имя пользователя</label>
             </span>
             <span class="p-float-label">
                 <p-password id="passwordLogin" v-model="passwordLogin" :feedback="false"></p-password>
@@ -84,42 +133,75 @@
             <p-button label="Вход" style="width: 100%; margin-top: 10px" @@click="login"></p-button>
         </p-dialog>
         <p-dialog id="registration-form"
-            v-model:visible="registrationForm"
-            :modal="true"
-        >
-            <h5>Тут выход</h5>
+                  header="Регистрация"
+                  v-model:visible="registrationForm"
+                  :modal="true">
+            <span class="p-float-label">
+                <p-inputtext id="emailRegistration" type="text" v-model="emailRegistration"></p-inputtext>
+                <label for="emailRegistration">Email</label>
+            </span>
+            <span class="p-float-label">
+                <p-inputtext id="loginRegistration" type="text" v-model="loginRegistration"></p-inputtext>
+                <label for="loginRegistration">Имя пользователя</label>
+            </span>
+            <span class="p-float-label">
+                <p-password id="passwordRegistration" v-model="passwordRegistration" :feedback="false"></p-password>
+                <label for="passwordRegistration">Пароль</label>
+            </span>
+            <span class="p-float-label">
+                <p-password id="passwordAgainRegistration" v-model="passwordAgainRegistration" :feedback="false"></p-password>
+                <label for="passwordAgainRegistration">Пароль (повторно)</label>
+            </span>
+            <p-button label="Регистрация" style="width: 100%; margin-top: 10px" @@click="registration"></p-button>
         </p-dialog>
         <div id="main-div">
             <div id="top-menu">
                 <p-button id="left-menu-button"
                           icon="bx bx-menu bx-md"
                           @@click="leftMenu = true"
-                          @Html.Raw(!User.Identity.IsAuthenticated ? "disabled" : "")></p-button>
+                          @Html.Raw(!User.Identity.IsAuthenticated || Context.Request.Path != "/" ? "disabled" : "")></p-button>
+                <h2>Аспирант</h2>
                 <div style="flex-grow: 1"></div>
                 <div id="auth-div" :style="{display: unauth ? '' : 'none'}">
                     <p-button label="Вход" @@click="loginForm = true"></p-button>
                     <p-button label="Регистрация" @@click="registrationForm = true"></p-button>
                 </div>
                 <div id="greeting" :style="{display: !unauth ? '' : 'none'}">
-                    <p>@Html.Raw(User.Identity != null ? User.Identity.Name : "")</p>
                     <p-button label="Выход" @@click="logout"></p-button>
                 </div>
             </div>
 
-            @RenderBody()
+            <div id="main-content">
+                @RenderBody()
+            </div>
         </div>
     </div>
     <script>
         const App = {
             data: () => {
                 return {
-                    message: '',
                     leftMenu: false,
                     unauth: @Html.Raw(User.Identity.IsAuthenticated ? "false" : "true"),
                     loginForm: false,
                     registrationForm: false,
                     loginLogin: '',
-                    passwordLogin: ''
+                    passwordLogin: '',
+                    emailRegistration: '',
+                    loginRegistration: '',
+                    passwordRegistration: '',
+                    passwordAgainRegistration: '',
+                    activeTab: @Html.Raw(User.Identity.IsAuthenticated ? 1 : 0),
+
+                    lastname: '',
+                    firstname: '',
+                    patronymic: '',
+                    birthdate: null,
+                    citizenship: '',
+                    passport: '',
+                    workbook: false,
+                    workplaces: '',
+                    contacts: '',
+                    enducations: []
                 }
             },
             components: {
@@ -127,7 +209,12 @@
                 'p-password': primevue.password,
                 'p-button': primevue.button,
                 'p-side-bar': primevue.sidebar,
-                'p-dialog': primevue.dialog
+                'p-dialog': primevue.dialog,
+                'p-calendar': primevue.calendar,
+                'p-datatable': primevue.datatable,
+                'p-column': primevue.column,
+                'p-checkbox': primevue.checkbox,
+                'p-fieldset': primevue.fieldset
             },
             methods: {
                 login() {
@@ -150,7 +237,50 @@
                         method: 'POST'
                     }).then(res => {
                         if (res.ok)
-                            window.location = window.location;
+                            window.location = location.hostname;
+                    });
+                },
+                registration() {
+                    fetch('/api/Account/Registration', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        },
+                        body: JSON.stringify({
+                            username: this.loginRegistration,
+                            email: this.emailRegistration,
+                            password: this.passwordRegistration
+                        })
+                    }).then(res => {
+                        if (res.ok)
+                            window.location = '/';
+                    });
+                },
+                switchTab(id) {
+                    this.activeTab = id;
+                    this.leftMenu = false;
+                },
+
+                personSave() {
+                    fetch('/api/Person/Add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        },
+                        body: JSON.stringify({
+                            lastname: this.lastname,
+                            firstname: this.firstname,
+                            patronymic: this.patronymic,
+                            birthdate: this.birthdate,
+                            citizenship: this.citizenship,
+                            passport: this.passport,
+                            workbook: this.workbook,
+                            workplaces: this.workplaces,
+                            contacts: this.contacts,
+                        })
+                    }).then(res => {
+                        if (res.ok)
+                            window.location = '/';
                     });
                 }
             }

@@ -39,7 +39,14 @@ namespace WebServer
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebServer", Version = "v1" });
             });
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("Policy", builder =>
+                {
+                    builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().WithOrigins("http://localhost:19006");
+                });
+            });
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,7 +66,7 @@ namespace WebServer
 
             app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
