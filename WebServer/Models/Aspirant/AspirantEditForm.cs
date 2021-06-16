@@ -33,24 +33,28 @@ namespace WebServer.Models
         [MaxLength(100)]
         public string DissertationTheme { get; set; }
 
+        public int? TeacherId { get; set; }
+
         public Aspirant GetAspirant(Aspirant aspirant)
         {
-            if (string.IsNullOrWhiteSpace(ForeignLanguage))
+            if (!string.IsNullOrWhiteSpace(ForeignLanguage))
                 aspirant.ForeignLanguage = ForeignLanguage;
-            if (string.IsNullOrWhiteSpace(EnducationForm))
+            if (!string.IsNullOrWhiteSpace(EnducationForm))
                 aspirant.EnducationForm = EnducationForm;
-            if (string.IsNullOrWhiteSpace(EnducationDirection))
+            if (!string.IsNullOrWhiteSpace(EnducationDirection))
                 aspirant.EnducationDirection = EnducationDirection;
-            if (string.IsNullOrWhiteSpace(Specialty))
+            if (!string.IsNullOrWhiteSpace(Specialty))
                 aspirant.Specialty = Specialty;
-            if (string.IsNullOrWhiteSpace(Cathedra))
+            if (!string.IsNullOrWhiteSpace(Cathedra))
                 aspirant.Cathedra = Cathedra;
-            if (string.IsNullOrWhiteSpace(Faculty))
+            if (!string.IsNullOrWhiteSpace(Faculty))
                 aspirant.Faculty = Faculty;
-            if (string.IsNullOrWhiteSpace(Decree))
+            if (!string.IsNullOrWhiteSpace(Decree))
                 aspirant.Decree = Decree;
-            if (string.IsNullOrWhiteSpace(DissertationTheme))
+            if (!string.IsNullOrWhiteSpace(DissertationTheme))
                 aspirant.DissertationTheme = DissertationTheme;
+            if (TeacherId.HasValue)
+                aspirant.TeacherId = TeacherId.Value;
             return aspirant;
         }
     }

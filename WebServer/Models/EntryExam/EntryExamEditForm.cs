@@ -25,7 +25,7 @@ namespace WebServer.Models
         {
             if (Date.HasValue)
                 exam.Date = Date.Value;
-            if (string.IsNullOrWhiteSpace(Subject))
+            if (!string.IsNullOrWhiteSpace(Subject))
                 exam.Subject = Subject;
             if (TeacherId.HasValue)
                 exam.TeacherId = TeacherId.Value;

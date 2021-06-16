@@ -9,19 +9,19 @@ namespace WebServer.Models
 {
     public class ExamAddForm
     {
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Дата и время проведения' должно быть заполнено")]
         public DateTime Date { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Тип' должно быть заполнено")]
         public ExamType ExamType { get; set; }
 
-        [Required, MaxLength(50)]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Предмет' должно быть заполнено"), MaxLength(50)]
         public string Subject { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Преподаватель' должно быть заполнено")]
         public int TeacherId { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Результат' должно быть заполнено")]
         public int Result { get; set; }
 
         public Exam GetExam()

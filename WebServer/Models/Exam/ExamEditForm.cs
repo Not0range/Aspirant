@@ -29,7 +29,7 @@ namespace WebServer.Models
                 exam.Date = Date.Value;
             if (ExamType.HasValue)
                 exam.ExamType = ExamType.Value;
-            if (string.IsNullOrWhiteSpace(Subject))
+            if (!string.IsNullOrWhiteSpace(Subject))
                 exam.Subject = Subject;
             if (TeacherId.HasValue)
                 exam.TeacherId = TeacherId.Value;

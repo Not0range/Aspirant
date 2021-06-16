@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Database;
 using Database.Entities;
@@ -15,28 +16,23 @@ namespace WebServer.Pages
     {
         AspirantDBContext _ctx;
 
+        private readonly IHttpClientFactory _clientFactory;
+
         public Person Person { get; set; }
 
-        public IndexModel(AspirantDBContext context, IHttpContextAccessor contextAccessor)
+        public IndexModel(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
         {
-            _ctx = context;
-            if(contextAccessor.HttpContext.User.Claims.Count() > 0)
+            _clientFactory = clientFactory;
+            if (contextAccessor.HttpContext.User.IsInRole("admin"))
             {
-                int id = int.Parse(contextAccessor.HttpContext.User.Claims.First(i => i.Type == "ID").Value);
-                var person = _ctx.People.FirstOrDefault(i => i.UserId == id);
-                Person = person;
+                
             }
         }
         
         public ActionResult OnGet()
         {
             if (!User.Identity.IsAuthenticated)
-            {
                 HttpContext.Response.StatusCode = 401;
-                return Page();
-            }
-            if (Person == null)
-                return Redirect("/person");
             return Page();
         }
     }

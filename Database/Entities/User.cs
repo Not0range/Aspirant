@@ -16,18 +16,19 @@ namespace Database.Entities
         [IndexColumn]
         public int UserId { get; set; }
 
-        [Required]
+        [Required, MaxLength(50)]
         [IndexColumn]
-        [MaxLength(50)]
         public string Username { get; set; }
 
-        [Required]
+        [Required, MaxLength(50)]
         [IndexColumn]
-        [MaxLength(50)]
         public string Email { get; set; }
 
         [Required]
         [MaxLength(32)]
         public string Password { get; set; }
+
+        [Required]
+        public bool IsAdmin { get; set; }
     }
 }

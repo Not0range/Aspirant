@@ -1,6 +1,7 @@
 ﻿using Database;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,12 @@ namespace WebServer.Controllers
     {
         protected readonly AspirantDBContext _ctx;
 
-        public APIBase(AspirantDBContext ctx)
+        protected readonly ILogger _logger;
+
+        public APIBase(AspirantDBContext ctx, ILogger logger)
         {
             _ctx = ctx;
+            _logger = logger;
         }
     }
 }

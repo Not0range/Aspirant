@@ -36,23 +36,23 @@ namespace WebServer.Models
 
         public Person GetPerson(Person person)
         {
-            if (string.IsNullOrWhiteSpace(Lastname))
+            if (!string.IsNullOrWhiteSpace(Lastname))
                 person.Lastname = Lastname;
-            if (string.IsNullOrWhiteSpace(Firstname))
+            if (!string.IsNullOrWhiteSpace(Firstname))
                 person.Firstname = Firstname;
-            if (string.IsNullOrWhiteSpace(Patronymic))
+            if (!string.IsNullOrWhiteSpace(Patronymic))
                 person.Patronymic = Patronymic;
             if (Birthdate.HasValue)
                 person.Birthdate = Birthdate.Value;
-            if (string.IsNullOrWhiteSpace(Citizenship))
+            if (!string.IsNullOrWhiteSpace(Citizenship))
                 person.Citizenship = Citizenship;
-            if (string.IsNullOrWhiteSpace(Passport))
+            if (!string.IsNullOrWhiteSpace(Passport))
                 person.Passport = Passport;
             if (Workbook.HasValue)
                 person.Workbook = Workbook.Value;
-            if (string.IsNullOrWhiteSpace(Workplaces))
+            if (!string.IsNullOrWhiteSpace(Workplaces))
                 person.Workplaces = Workplaces;
-            if (string.IsNullOrWhiteSpace(Contacts))
+            if (!string.IsNullOrWhiteSpace(Contacts))
                 person.Contacts = Contacts;
             return person;
         }

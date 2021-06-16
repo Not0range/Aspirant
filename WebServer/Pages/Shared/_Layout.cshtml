@@ -3,28 +3,12 @@
 <head>
     <title>@ViewBag.Title</title>
     <link href="~/css/boxicons.css" rel="stylesheet" />
-
-    <link href="~/css/PrimeVueTheme.css" rel="stylesheet" />
-
-    <link href="~/css/primevue.min.css" rel="stylesheet" />
-    <link href="~/css/primeicons.css" rel="stylesheet" />
-
-    <script src="~/scripts/vue.global.js"></script>
-    <script src="~/scripts/primevue_component/api.js"></script>
-    <script src="~/scripts/primevue_component/utils.js"></script>
-    <script src="~/scripts/primevue_component/config.js"></script>
-    <script src="~/scripts/primevue_component/ripple.js"></script>
-
-    <script src="~/scripts/primevue_component/inputtext.js"></script>
-    <script src="~/scripts/primevue_component/password.js"></script>
-    <script src="~/scripts/primevue_component/button.js"></script>
-    <script src="~/scripts/primevue_component/sidebar.js"></script>
-    <script src="~/scripts/primevue_component/dialog.js"></script>
-    <script src="~/scripts/primevue_component/checkbox.js"></script>
-    <script src="~/scripts/primevue_component/calendar.js"></script>
-    <script src="~/scripts/primevue_component/datatable.js"></script>
-    <script src="~/scripts/primevue_component/column.js"></script>
-    <script src="~/scripts/primevue_component/fieldset.js"></script>
+    <link type="text/css" rel="stylesheet" href="~/css/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="~/css/bootstrap-vue.css" />
+    <script src="~/js/vue.js"></script>
+    <script src="~/js/bootstrap-vue.js"></script>
+    <script src="~/js/popper.min.js"></script>
+    <script src="~/js/portal-vue.umd.min.js"></script>
 
     <style>
         body {
@@ -35,6 +19,9 @@
             width: 50px;
             height: 50px;
             background-color: transparent;
+            border: 0;
+            padding: 0px;
+            margin-right: 10px;
         }
 
         #main-div {
@@ -45,19 +32,16 @@
         }
 
         #top-menu {
-            grid-row-start: 0;
+            width: 100%;
             background-color: lightblue;
             display: flex;
             align-items: center;
+            position: fixed;
         }
 
-        #auth-div .p-button {
+        #auth-div .b-button {
             margin-left: 5px;
             margin-right: 5px;
-        }
-
-        .p-float-label {
-            margin: 10px 5px 5px 5px;
         }
 
         #greeting {
@@ -65,17 +49,9 @@
             display: flex;
         }
 
-            #greeting p {
-                margin-right: 10px;
-            }
-
         #main-content {
             margin: 5px;
-        }
-
-        .p-sidebar-content {
-            display: flex;
-            flex-direction: column
+            grid-row-start: 2
         }
 
         .tab-div {
@@ -92,82 +68,67 @@
             background-color: transparent;
             color: black;
             text-align: left;
+            border: 0 !important;
+            width: 100%;
+        }
+
+        .menu-aspirant-elem {
+            margin-left: 20px;
         }
 
         .tab-div h1 {
             text-align: center
         }
 
-        #person-div {
-            align-items: center;
+        button.close {
+            padding: 0;
+            background-color: transparent;
+            border: 0
         }
 
-            #person-div input {
-                width: 350px;
-            }
+        .modal-dialog footer{
+            display: none;
+        }
 
-            #person-div .p-datatable-table {
-                width: 500px;
-            }
+        .sr-only{
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div id="body-div">
-        <p-side-bar v-model:visible="leftMenu">
-            <h2>Меню</h2>
-            <p-button class="menu-elem-button" label="Данные о физическом лице" @@click="switchTab(1)"></p-button>
-            <p-button class="menu-elem-button" label="Данные о вступительных экзаменах" @@click="switchTab(2)"></p-button>
-            <p-button class="menu-elem-button" label="Данные об аспиранте" @@click="switchTab(3)"></p-button>
-            <p-button class="menu-elem-button" label="Экзамены/зачёты" @@click="switchTab(4)"></p-button>
-        </p-side-bar>
-        <p-dialog header="Вход" id="login-form" v-model:visible="loginForm"
-                  :modal="true">
-            <span class="p-float-label">
-                <p-inputtext id="loginLogin" type="text" v-model="loginLogin"></p-inputtext>
-                <label for="loginLogin">Email или имя пользователя</label>
-            </span>
-            <span class="p-float-label">
-                <p-password id="passwordLogin" v-model="passwordLogin" :feedback="false"></p-password>
-                <label for="passwordLogin">Пароль</label>
-            </span>
-            <p-button label="Вход" style="width: 100%; margin-top: 10px" @@click="login"></p-button>
-        </p-dialog>
-        <p-dialog id="registration-form"
-                  header="Регистрация"
-                  v-model:visible="registrationForm"
-                  :modal="true">
-            <span class="p-float-label">
-                <p-inputtext id="emailRegistration" type="text" v-model="emailRegistration"></p-inputtext>
-                <label for="emailRegistration">Email</label>
-            </span>
-            <span class="p-float-label">
-                <p-inputtext id="loginRegistration" type="text" v-model="loginRegistration"></p-inputtext>
-                <label for="loginRegistration">Имя пользователя</label>
-            </span>
-            <span class="p-float-label">
-                <p-password id="passwordRegistration" v-model="passwordRegistration" :feedback="false"></p-password>
-                <label for="passwordRegistration">Пароль</label>
-            </span>
-            <span class="p-float-label">
-                <p-password id="passwordAgainRegistration" v-model="passwordAgainRegistration" :feedback="false"></p-password>
-                <label for="passwordAgainRegistration">Пароль (повторно)</label>
-            </span>
-            <p-button label="Регистрация" style="width: 100%; margin-top: 10px" @@click="registration"></p-button>
-        </p-dialog>
         <div id="main-div">
             <div id="top-menu">
-                <p-button id="left-menu-button"
-                          icon="bx bx-menu bx-md"
-                          @@click="leftMenu = true"
-                          @Html.Raw(!User.Identity.IsAuthenticated || Context.Request.Path != "/" ? "disabled" : "")></p-button>
-                <h2>Аспирант</h2>
+                <b-sidebar v-model:visible="leftMenu" title="Меню" backdrop shadow>
+                    <b-button class="menu-elem-button" @@click="switchTab(2)">Список зарегистрированных аспирантов</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(3)">Данные о физическом лице</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(4)">Данные о вступительных экзаменах</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(5)">Данные об аспиранте</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(6)">Экзамены/зачёты</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(7)">Список преподавателей</b-button>
+                </b-sidebar>
+                <b-modal header="Вход" id="login-form" v-model="loginForm" centered>
+                    <template #modal-title>
+                        Вход
+                    </template>
+                    <b-form-input id="loginLogin" v-model="loginLogin" placeholder="Email или имя пользователя"></b-form-input>
+                    <b-form-input id="passwordLogin" type="password" v-model="passwordLogin" placeholder="Пароль"></b-form-input>
+                    <b-button style="margin-top: 10px; width: 100%" @@click="login" :disabled="loginAttempt">
+                        <i v-if="loginAttempt" class="bx bx-loader-alt bx-spin"></i>Вход
+                    </b-button>
+                </b-modal>
+                <b-button id="left-menu-button"
+                            @@click="leftMenu = true"
+                            @Html.Raw(!User.Identity.IsAuthenticated || !User.IsInRole("admin") || Context.Request.Path != "/" ? "disabled" : "")>
+                    <i class="bx bx-menu bx-md"></i>
+                </b-button>
+                <h2 style="cursor: default; user-select: none;">Аспирант</h2>
                 <div style="flex-grow: 1"></div>
                 <div id="auth-div" :style="{display: unauth ? '' : 'none'}">
-                    <p-button label="Вход" @@click="loginForm = true"></p-button>
-                    <p-button label="Регистрация" @@click="registrationForm = true"></p-button>
+                    <b-button @@click="loginForm = true">Вход</b-button>
                 </div>
                 <div id="greeting" :style="{display: !unauth ? '' : 'none'}">
-                    <p-button label="Выход" @@click="logout"></p-button>
+                    <b-button @@click="logout">Выход</b-button>
                 </div>
             </div>
 
@@ -177,47 +138,27 @@
         </div>
     </div>
     <script>
-        const App = {
-            data: () => {
-                return {
-                    leftMenu: false,
-                    unauth: @Html.Raw(User.Identity.IsAuthenticated ? "false" : "true"),
-                    loginForm: false,
-                    registrationForm: false,
-                    loginLogin: '',
-                    passwordLogin: '',
-                    emailRegistration: '',
-                    loginRegistration: '',
-                    passwordRegistration: '',
-                    passwordAgainRegistration: '',
-                    activeTab: @Html.Raw(User.Identity.IsAuthenticated ? 1 : 0),
+        window.topApp = new Vue({
+            el: '#top-menu',
+            data: {
+                leftMenu: false,
+                unauth: @Html.Raw(User.Identity.IsAuthenticated ? "false" : "true"),
+                isAdmin: @Html.Raw(User.IsInRole("admin") ? "true" : "false"),
+                loginForm: false,
+                registrationForm: false,
 
-                    lastname: '',
-                    firstname: '',
-                    patronymic: '',
-                    birthdate: null,
-                    citizenship: '',
-                    passport: '',
-                    workbook: false,
-                    workplaces: '',
-                    contacts: '',
-                    enducations: []
-                }
-            },
-            components: {
-                'p-inputtext': primevue.inputtext,
-                'p-password': primevue.password,
-                'p-button': primevue.button,
-                'p-side-bar': primevue.sidebar,
-                'p-dialog': primevue.dialog,
-                'p-calendar': primevue.calendar,
-                'p-datatable': primevue.datatable,
-                'p-column': primevue.column,
-                'p-checkbox': primevue.checkbox,
-                'p-fieldset': primevue.fieldset
+                loginLogin: '',
+                passwordLogin: '',
+                loginAttempt: false,
+
+                emailRegistration: '',
+                loginRegistration: '',
+                passwordRegistration: '',
+                passwordAgainRegistration: '',
             },
             methods: {
                 login() {
+                    this.loginAttempt = true;
                     fetch('/api/Account/Login', {
                         method: 'POST',
                         headers: {
@@ -230,6 +171,8 @@
                     }).then(res => {
                         if (res.ok)
                             window.location = window.location;
+                        else
+                            loginAttempt = false;
                     });
                 },
                 logout() {
@@ -237,57 +180,15 @@
                         method: 'POST'
                     }).then(res => {
                         if (res.ok)
-                            window.location = location.hostname;
-                    });
-                },
-                registration() {
-                    fetch('/api/Account/Registration', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8'
-                        },
-                        body: JSON.stringify({
-                            username: this.loginRegistration,
-                            email: this.emailRegistration,
-                            password: this.passwordRegistration
-                        })
-                    }).then(res => {
-                        if (res.ok)
                             window.location = '/';
                     });
                 },
                 switchTab(id) {
-                    this.activeTab = id;
+                    window.bodyApp.activeTab = id;
                     this.leftMenu = false;
                 },
-
-                personSave() {
-                    fetch('/api/Person/Add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8'
-                        },
-                        body: JSON.stringify({
-                            lastname: this.lastname,
-                            firstname: this.firstname,
-                            patronymic: this.patronymic,
-                            birthdate: this.birthdate,
-                            citizenship: this.citizenship,
-                            passport: this.passport,
-                            workbook: this.workbook,
-                            workplaces: this.workplaces,
-                            contacts: this.contacts,
-                        })
-                    }).then(res => {
-                        if (res.ok)
-                            window.location = '/';
-                    });
-                }
             }
-        };
-        let vue = Vue.createApp(App);
-        vue.use(primevue.config.default);
-        vue.mount('#body-div');
+        });
     </script>
 </body>
 </html>

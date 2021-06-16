@@ -29,13 +29,13 @@ namespace WebServer.Models
 
         public Enducation GetEnducation(Enducation enducation)
         {
-            if (string.IsNullOrWhiteSpace(Level))
+            if (!string.IsNullOrWhiteSpace(Level))
                 enducation.Level = Level;
-            if (string.IsNullOrWhiteSpace(Document))
+            if (!string.IsNullOrWhiteSpace(Document))
                 enducation.Document = Document;
             if (EndDate.HasValue)
                 enducation.EndDate = EndDate.Value;
-            if (string.IsNullOrWhiteSpace(Specialty))
+            if (!string.IsNullOrWhiteSpace(Specialty))
                 enducation.Specialty = Specialty;
             if (Excellent.HasValue)
                 enducation.Excellent = Excellent.Value;

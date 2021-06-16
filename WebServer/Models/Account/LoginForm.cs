@@ -8,10 +8,10 @@ namespace WebServer.Models
 {
     public class LoginForm
     {
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Имя пользователя' должно быть заполнено")]
         public string Login { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Пароль' должно быть заполнено")]
         public string Password { get; set; }
     }
 }

@@ -33,12 +33,17 @@ namespace WebServer
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
             services.AddDbContext<AspirantDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("AspirantDb")));
-            services.AddControllers();
-            services.AddRazorPages();
-            services.AddSwaggerGen(c =>
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebServer", Version = "v1" });
+                options.InvalidModelStateResponseFactory = ctx =>
+                {
+                    var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("Console");
+                    logger.LogDebug($"Client Error: {ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path} \n" +
+                    $"{{ {string.Join(", ", ctx.ModelState.Select(p => $"{p.Key}: {p.Value.AttemptedValue}"))} }}");
+                    return new BadRequestObjectResult(ctx.ModelState);
+                };
             });
+            services.AddRazorPages();
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy", builder =>
@@ -47,6 +52,7 @@ namespace WebServer
                 });
             });
             services.AddHttpContextAccessor();
+            services.AddHttpClient("controllers", c => c.BaseAddress = new Uri("http://127.0.0.1/"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,8 +61,6 @@ namespace WebServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebServer v1"));
             }
 
             app.UseCookiePolicy(new CookiePolicyOptions

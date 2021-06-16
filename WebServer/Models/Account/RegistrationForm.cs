@@ -8,13 +8,16 @@ namespace WebServer.Models
 {
     public class RegistrationForm
     {
-        [Required]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Имя пользователя' должно быть заполнено")]
         public string Username { get; set; }
 
-        [Required, RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Электронная почта' должно быть заполнено")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Неверный формат электронной почты")]
         public string Email { get; set; }
 
-        [Required, MaxLength(32), MinLength(6)]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Пароль' должно быть заполнено")]
+        [MaxLength(32, ErrorMessage = "Пароль не может быть длинее 32-х символов")]
+        [MinLength(6, ErrorMessage = "Пароль не может быть короче 6-ти символов")]
         public string Password { get; set; }
     }
 }
