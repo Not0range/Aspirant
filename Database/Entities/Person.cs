@@ -36,7 +36,7 @@ namespace Database.Entities
 
         public bool Workbook { get; set; }
 
-        [Required, MaxLength(250)]
+        [MaxLength(250)]
         public string Workplaces { get; set; }
 
         [Required, MaxLength(250)]

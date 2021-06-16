@@ -30,7 +30,7 @@ namespace WebServer.Models
         [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Наличие трудовой книжки' должно быть заполнено")]
         public bool Workbook { get; set; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Место работы' должно быть заполнено"), MaxLength(250)]
+        [MaxLength(250)]
         public string Workplaces { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Поле 'Контактные данные' должно быть заполнено"), MaxLength(250)]
@@ -38,7 +38,7 @@ namespace WebServer.Models
 
         public Person GetPerson()
         {
-            return new Person
+            var p = new Person
             {
                 Lastname = Lastname,
                 Firstname = Firstname,
@@ -47,9 +47,11 @@ namespace WebServer.Models
                 Citizenship = Citizenship,
                 Passport = Passport,
                 Workbook = Workbook,
-                Workplaces = Workplaces,
                 Contacts = Contacts
             };
+            if (!string.IsNullOrWhiteSpace(Workplaces))
+                p.Workplaces = Workplaces;
+            return p;
         }
     }
 }
