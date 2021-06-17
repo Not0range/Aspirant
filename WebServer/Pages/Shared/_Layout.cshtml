@@ -101,11 +101,11 @@
             <div id="top-menu">
                 <b-sidebar v-model:visible="leftMenu" title="Меню" backdrop shadow>
                     <b-button class="menu-elem-button" @@click="switchTab(2)">Список зарегистрированных аспирантов</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(3)">Данные о физическом лице</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(4)">Данные о вступительных экзаменах</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(5)">Данные об аспиранте</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(6)">Экзамены/зачёты</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(7)">Список преподавателей</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(3)" :disabled="!personSelected">Данные о физическом лице</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(4)" :disabled="!personSelected">Данные о вступительных экзаменах</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(5)" :disabled="!personSelected">Данные об аспиранте</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(6)" :disabled="!personSelected">Экзамены/зачёты</b-button>
+                    <b-button class="menu-elem-button" @@click="switchTab(7)">Список преподавателей</b-button>
                 </b-sidebar>
                 <b-modal header="Вход" id="login-form" v-model="loginForm" centered>
                     <template #modal-title>
@@ -155,6 +155,8 @@
                 loginRegistration: '',
                 passwordRegistration: '',
                 passwordAgainRegistration: '',
+
+                personSelected: false
             },
             methods: {
                 login() {
@@ -170,7 +172,7 @@
                         })
                     }).then(res => {
                         if (res.ok)
-                            window.location = window.location;
+                            window.location = '/';
                         else
                             loginAttempt = false;
                     });

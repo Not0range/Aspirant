@@ -39,13 +39,45 @@
         </b-table>
     </div>
     <div class="tab-div" :style="{display: activeTab != 3 ? 'none' : ''}">
-        <h1>Вступительные экзамены</h1>
+        <h1>Данные физического лица</h1>
+        <div v-if="person !== null">
+            <p>ФИО: {{person.lastname}} {{person.firstname}} {{person.patronymic}}</p>
+            <p>Дата рождения: {{person.date}}</p>
+            <p>Гражданство: {{person.citizenship}}</p>
+            <p>Документ, удостоверяющий личность: {{person.passport}}</p>
+            <p>Наличие трудовой книжки: {{person.workbook ? 'В наличии' : 'Отсутствует'}}</p>
+            <p>Место работы: {{person.workplaces}}</p>
+            <p>Контактные данные: {{person.contacts}}</p>
+        </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 4 ? 'none' : ''}">
-        <h1>Данные аспиранта</h1>
+        <h1>Вступительные экзамены</h1>
     </div>
     <div class="tab-div" :style="{display: activeTab != 5 ? 'none' : ''}">
+        <h1>Данные аспиранта</h1>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 6 ? 'none' : ''}">
         <h1>Зачёты/экзаменыа</h1>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 7 ? 'none' : ''}">
+        <h1>Список преподавателей</h1>
+        <b-table :items="teachers"
+                 :fields="personFields"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onTeacherRowSelected">
+            <template #cell(selectedTeacher)="{ rowSelected }">
+                <template v-if="rowSelected">
+                    <span aria-hidden="true">&check;</span>
+                </template>
+                <template v-else>
+                    <span aria-hidden="true">&nbsp;</span>
+                </template>
+            </template>
+        </b-table>
     </div>
 </div>
 <script>
@@ -70,13 +102,55 @@
                     sortable: true,
                     label: 'Отчество'
                 }],
-            persons: [{id: 0, lastname: 'dsdsd', firstname: 'dsdsd', patronymic: 'dsdsds'}],
-            selectedPerson: null
+            persons: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.People)),
+
+            teacherFields: [
+                {
+                    key: 'lastname',
+                    sortable: true,
+                    label: 'Фамилия'
+                },
+                {
+                    key: 'firstname',
+                    sortable: true,
+                    label: 'Имя'
+                },
+                {
+                    key: 'patronymic',
+                    sortable: true,
+                    label: 'Отчество'
+                }],
+            teachers: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Teachers)),
+
+            selectedPerson: [],
+            selectedTeacher: [],
+            person: null
         },
         methods: {
             onPersonRowSelected(items) {
                 this.selectedPerson = items;
+                if (this.selectedPerson.length > 0) {
+                    window.topApp.personSelected = true;
+                    fetch(`/api/person/getat?id=${this.selectedPerson[0].id}`)
+                        .then(res => {
+                            if (res.status == 200)
+                                res.json().then(r => {
+                                    this.person = r;
+                                    let d = new Date(Date.parse(this.person.birthdate));
+                                    this.person.date = `${d.getDate().toString().length == 1 ? '0' : ''}${d.getDate()}.` +
+                                        `${(d.getMonth() + 1).toString().length == 1 ? '0' : ''}${d.getMonth() + 1}.` +
+                                        `${d.getFullYear()}`;
+                                });
+                        })
+                }
+                else this.person = null;
+            },
+            onTeacherRowSelected(items) {
+                this.selectedTeacher = items;
             }
+        },
+        computed: {
+            
         }
     });
 </script>

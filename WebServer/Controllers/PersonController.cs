@@ -46,6 +46,61 @@ namespace WebServer.Controllers
             return person;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<Person>> GetAt(int id)
+        {
+            _logger.LogDebug($"[{DateTime.Now}]Attempting get persons list");
+            if (!User.Identity.IsAuthenticated)
+            {
+                _logger.LogDebug($"Unauthorized");
+                return Unauthorized();
+            }
+
+            int userId;
+            if (!int.TryParse(User.Claims.FirstOrDefault(i => i.Type == "ID").Value, out userId))
+            {
+                _logger.LogDebug($"Unauthorized");
+                return Unauthorized();
+            }
+            _logger.LogDebug($"UserId: {userId}");
+
+            if (!User.IsInRole("admin"))
+                return Forbid();
+
+            var person = await _ctx.People.FirstOrDefaultAsync(i => i.Id == id);
+            if (person == null)
+            {
+                _logger.LogDebug($"Person not found");
+                return NotFound();
+            }
+            _logger.LogDebug($"Person found ({person.Lastname} {person.Firstname} {person.Patronymic})");
+            return person;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Person>>> GetAll()
+        {
+            _logger.LogDebug($"[{DateTime.Now}]Attempting get persons list");
+            if (!User.Identity.IsAuthenticated)
+            {
+                _logger.LogDebug($"Unauthorized");
+                return Unauthorized();
+            }
+
+            int id;
+            if (!int.TryParse(User.Claims.FirstOrDefault(i => i.Type == "ID").Value, out id))
+            {
+                _logger.LogDebug($"Unauthorized");
+                return Unauthorized();
+            }
+            _logger.LogDebug($"UserId: {id}");
+
+            if (!User.IsInRole("admin"))
+                return Forbid();
+
+            return await _ctx.People.ToListAsync();
+        }
+
         [HttpPost]
         public async Task<ActionResult> Add([FromBody] PersonAddForm form)
         {
