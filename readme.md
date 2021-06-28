@@ -1,3 +1,5 @@
+Этот файл лучше открыть отдельно, чтобы не потерять переносы
+
 Для запуска нужен самозаверенный сертификат<br>
 В PowerShell запустить по порядку<br>
 $cert = New-SelfSignedCertificate -DnsName @("aspirant.test", "www.aspirant.test") -CertStoreLocation "cert:\LocalMachine\My"<br>
