@@ -5,9 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\**" />
     <Compile Remove="wwwroot\styles\**" />
+    <Content Remove="Models\**" />
     <Content Remove="wwwroot\styles\**" />
+    <EmbeddedResource Remove="Models\**" />
     <EmbeddedResource Remove="wwwroot\styles\**" />
+    <None Remove="Models\**" />
     <None Remove="wwwroot\styles\**" />
   </ItemGroup>
 
@@ -20,10 +24,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Database\Database.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,13 +3,17 @@
 @{
     ViewBag.Title = "Главная";
     Layout = "_Layout";
+    ViewBag.Address = "127.0.0.1:5001";
 }
 
 <div id="content-div">
+    <div class="tab-div" :style="{display: activeTab != -1 ? 'none' : ''}">
+        <b-spinner style="align-self: center"></b-spinner>
+    </div>
     <div class="tab-div" :style="{display: activeTab != 0 ? 'none' : ''}">
         <h1>
             Чтобы воспользоваться системой «Аспирант» необходимо
-            <span class="clickable-text" @@click="loginForm = true">войти</span>.
+            <span class="clickable-text" @@click="openLoginForm">войти</span>.
         </h1>
     </div>
     <div class="tab-div" :style="{display: activeTab != 1 ? 'none' : ''}">
@@ -19,7 +23,7 @@
         </h1>
     </div>
     <div class="tab-div" :style="{display: activeTab != 2 ? 'none' : ''}">
-        <h1>Зарегистрированные аспиранты</h1>
+        <h1>Зарегистрированные физ. лица</h1>
         <b-table :items="persons"
                  :fields="personFields"
                  select-mode="single"
@@ -39,15 +43,13 @@
         </b-table>
     </div>
     <div class="tab-div" :style="{display: activeTab != 3 ? 'none' : ''}">
-        <h1>Данные физического лица</h1>
-        <div v-if="person !== null">
-            <p>ФИО: {{person.lastname}} {{person.firstname}} {{person.patronymic}}</p>
-            <p>Дата рождения: {{person.date}}</p>
-            <p>Гражданство: {{person.citizenship}}</p>
-            <p>Документ, удостоверяющий личность: {{person.passport}}</p>
-            <p>Наличие трудовой книжки: {{person.workbook ? 'В наличии' : 'Отсутствует'}}</p>
-            <p>Место работы: {{person.workplaces}}</p>
-            <p>Контактные данные: {{person.contacts}}</p>
+        <h1>Данные об абитуриенте</h1>
+        <div v-if="abiturient !== null" style="display: flex; flex-wrap: wrap;">
+            <div v-for="a in abiturient.specialties.map(i => i)" class="abitur-spec">
+                <p>Факультет: {{getSpecialty(a).faculty}}</p>
+                <p>Кафедра: {{getSpecialty(a).cathedra}}</p>
+                <p>Специальность: {{getSpecialty(a).specialty}}</p>
+            </div>
         </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 4 ? 'none' : ''}">
@@ -62,7 +64,7 @@
     <div class="tab-div" :style="{display: activeTab != 7 ? 'none' : ''}">
         <h1>Список преподавателей</h1>
         <b-table :items="teachers"
-                 :fields="personFields"
+                 :fields="teacherFields"
                  select-mode="single"
                  responsive="sm"
                  ref="selectableTable"
@@ -84,7 +86,11 @@
     window.bodyApp = new Vue({
         el: '#content-div',
         data: {
-            activeTab: @Html.Raw(!User.Identity.IsAuthenticated ? 0 : !User.IsInRole("admin") ?  1 : 2),
+            activeTab: -1,
+
+            faculties: [],
+            cathedras: [],
+            specialties: [],
 
             personFields: [
                 {
@@ -101,8 +107,38 @@
                     key: 'patronymic',
                     sortable: true,
                     label: 'Отчество'
+                },
+                {
+                    key: 'birth',
+                    sortable: true,
+                    label: 'Дата рождения'
+                },
+                {
+                    key: 'citizenship',
+                    sortable: true,
+                    label: 'Гражданство'
+                },
+                {
+                    key: 'passport',
+                    sortable: true,
+                    label: 'Документ'
+                },
+                {
+                    key: 'book',
+                    sortable: true,
+                    label: 'Трудовая книжка'
+                },
+                {
+                    key: 'wokplaces',
+                    sortable: true,
+                    label: 'Место работы'
+                },
+                {
+                    key: 'contacts',
+                    sortable: true,
+                    label: 'Контактные данные'
                 }],
-            persons: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.People)),
+            persons: [],
 
             teacherFields: [
                 {
@@ -119,38 +155,117 @@
                     key: 'patronymic',
                     sortable: true,
                     label: 'Отчество'
+                },
+                {
+                    key: 'birth',
+                    sortable: true,
+                    label: 'Дата рождения'
+                },
+                {
+                    key: 'cathedra',
+                    sortable: true,
+                    label: 'Кафедра'
+                },
+                {
+                    key: 'rank',
+                    sortable: true,
+                    label: 'Учёное звание'
+                },
+                {
+                    key: 'position',
+                    sortable: true,
+                    label: 'Должность'
                 }],
-            teachers: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Teachers)),
+            teachers: [],
 
-            selectedPerson: [],
-            selectedTeacher: [],
-            person: null
+            person: [],
+            teacher: [],
+            abiturient: null
         },
         methods: {
+            openLoginForm() {
+                window.topApp.loginForm = true;
+            },
             onPersonRowSelected(items) {
                 this.selectedPerson = items;
                 if (this.selectedPerson.length > 0) {
                     window.topApp.personSelected = true;
-                    fetch(`/api/person/getat?id=${this.selectedPerson[0].id}`)
+                    fetch(`https://@ViewBag.Address/api/abiturient/list`, { credentials: "include" })
                         .then(res => {
-                            if (res.status == 200)
-                                res.json().then(r => {
-                                    this.person = r;
-                                    let d = new Date(Date.parse(this.person.birthdate));
-                                    this.person.date = `${d.getDate().toString().length == 1 ? '0' : ''}${d.getDate()}.` +
-                                        `${(d.getMonth() + 1).toString().length == 1 ? '0' : ''}${d.getMonth() + 1}.` +
-                                        `${d.getFullYear()}`;
-                                });
+                            if (res.status == 200) {
+                                res.json().then(r =>
+                                    this.abiturient = r.find(i => i.personId == this.selectedPerson[0].id))
+                            }
                         })
                 }
-                else this.person = null;
+                else {
+                    window.topApp.personSelected = false;
+                    this.abiturient = null;
+                }
             },
             onTeacherRowSelected(items) {
                 this.selectedTeacher = items;
+            },
+            load() {
+                fetch(`https://@ViewBag.Address/api/person/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => {
+                                window.bodyApp.persons = r.map(i => {
+                                    i.book = i.workbook ? 'В наличии' : 'Отсутствует';
+                                    i.birth = `${new Date(Date.parse(i.birthdate)).getDate().toString().length == 1 ? '0' :
+                                        ''}${new Date(Date.parse(i.birthdate)).getDate()}.` +
+                                        `${(new Date(Date.parse(i.birthdate)).getMonth() + 1).toString().length == 1 ? '0' :
+                                            ''}${new Date(Date.parse(i.birthdate)).getMonth() + 1}.` +
+                                        `${new Date(Date.parse(i.birthdate)).getFullYear()}`;
+                                    return i;
+                                });
+                            });
+                    });
+                fetch(`https://@ViewBag.Address/api/faculty/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => this.faculties = r);
+                    });
+                fetch(`https://@ViewBag.Address/api/cathedra/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => this.cathedras = r);
+                    });
+                fetch(`https://@ViewBag.Address/api/specialty/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => this.specialties = r);
+                    });
+                fetch(`https://@ViewBag.Address/api/teacher/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => {
+                                window.bodyApp.teachers = r.map(i => {
+                                    i.cathedra = this.cathedras.find(c => c.id == i.cathedraId).title;
+                                    i.birth = `${new Date(Date.parse(i.birthDate)).getDate().toString().length == 1 ? '0' :
+                                        ''}${new Date(Date.parse(i.birthDate)).getDate()}.` +
+                                        `${(new Date(Date.parse(i.birthDate)).getMonth() + 1).toString().length == 1 ? '0' :
+                                            ''}${new Date(Date.parse(i.birthDate)).getMonth() + 1}.` +
+                                        `${new Date(Date.parse(i.birthDate)).getFullYear()}`;
+                                    return i;
+                                });
+                            });
+                    });
+            },
+            getSpecialty(id) {
+                let s = this.specialties.find(i => i.id == id);
+                let c = this.cathedras.find(i => s.cathedraId == i.id);
+                let f = this.faculties.find(i => i.id == c.facultyId);
+                return {
+                    specialty: s.title,
+                    cathedra: c.title,
+                    faculty: f.title
+                }
             }
         },
         computed: {
-            
+
         }
     });
 </script>

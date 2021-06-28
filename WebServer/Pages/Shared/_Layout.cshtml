@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    ViewBag.Address = "127.0.0.1:5001";
+}
+<!DOCTYPE html>
 <html>
 <head>
     <title>@ViewBag.Title</title>
@@ -86,12 +89,22 @@
             border: 0
         }
 
-        .modal-dialog footer{
+        .modal-dialog footer {
             display: none;
         }
 
-        .sr-only{
+        .sr-only {
             display: none;
+        }
+
+        .abitur-spec{
+            border-style: solid;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .abitur-spec p{
+            margin: 0px;
         }
     </style>
 </head>
@@ -101,25 +114,29 @@
             <div id="top-menu">
                 <b-sidebar v-model:visible="leftMenu" title="Меню" backdrop shadow>
                     <b-button class="menu-elem-button" @@click="switchTab(2)">Список зарегистрированных аспирантов</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(3)" :disabled="!personSelected">Данные о физическом лице</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(4)" :disabled="!personSelected">Данные о вступительных экзаменах</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(5)" :disabled="!personSelected">Данные об аспиранте</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" @@click="switchTab(6)" :disabled="!personSelected">Экзамены/зачёты</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                              @@click="switchTab(3)" :disabled="!personSelected">Данные об абитуриенте</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                              @@click="switchTab(4)" :disabled="!personSelected">Данные о вступительных экзаменах</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                              @@click="switchTab(5)" :disabled="!personSelected">Данные об аспиранте</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                              @@click="switchTab(6)" :disabled="!personSelected">Экзамены/зачёты</b-button>
                     <b-button class="menu-elem-button" @@click="switchTab(7)">Список преподавателей</b-button>
                 </b-sidebar>
                 <b-modal header="Вход" id="login-form" v-model="loginForm" centered>
                     <template #modal-title>
                         Вход
                     </template>
-                    <b-form-input id="loginLogin" v-model="loginLogin" placeholder="Email или имя пользователя"></b-form-input>
-                    <b-form-input id="passwordLogin" type="password" v-model="passwordLogin" placeholder="Пароль"></b-form-input>
+                    <b-form-input id="loginLogin" v-model="username" placeholder="Email или имя пользователя"></b-form-input>
+                    <b-form-input id="passwordLogin" type="password" v-model="password" placeholder="Пароль"></b-form-input>
                     <b-button style="margin-top: 10px; width: 100%" @@click="login" :disabled="loginAttempt">
                         <i v-if="loginAttempt" class="bx bx-loader-alt bx-spin"></i>Вход
                     </b-button>
                 </b-modal>
                 <b-button id="left-menu-button"
-                            @@click="leftMenu = true"
-                            @Html.Raw(!User.Identity.IsAuthenticated || !User.IsInRole("admin") || Context.Request.Path != "/" ? "disabled" : "")>
+                          @@click="leftMenu = true"
+                          :disabled="loading || unauth || !isAdmin ? 'disabled' : false">
                     <i class="bx bx-menu bx-md"></i>
                 </b-button>
                 <h2 style="cursor: default; user-select: none;">Аспирант</h2>
@@ -141,14 +158,15 @@
         window.topApp = new Vue({
             el: '#top-menu',
             data: {
+                loading: true,
                 leftMenu: false,
-                unauth: @Html.Raw(User.Identity.IsAuthenticated ? "false" : "true"),
-                isAdmin: @Html.Raw(User.IsInRole("admin") ? "true" : "false"),
+                unauth: true,
+                isAdmin: false,
                 loginForm: false,
                 registrationForm: false,
 
-                loginLogin: '',
-                passwordLogin: '',
+                username: '',
+                password: '',
                 loginAttempt: false,
 
                 emailRegistration: '',
@@ -161,15 +179,16 @@
             methods: {
                 login() {
                     this.loginAttempt = true;
-                    fetch('/api/Account/Login', {
+                    fetch('https://@ViewBag.Address/api/Account/Login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json;charset=utf-8'
                         },
                         body: JSON.stringify({
-                            login: this.loginLogin,
-                            password: this.passwordLogin
-                        })
+                            login: this.username,
+                            password: this.password
+                        }),
+                        credentials: "include"
                     }).then(res => {
                         if (res.ok)
                             window.location = '/';
@@ -178,8 +197,9 @@
                     });
                 },
                 logout() {
-                    fetch('/api/Account/Logout', {
-                        method: 'POST'
+                    fetch('https://@ViewBag.Address/api/Account/Logout', {
+                        method: 'POST',
+                        credentials: "include"
                     }).then(res => {
                         if (res.ok)
                             window.location = '/';
@@ -191,6 +211,27 @@
                 },
             }
         });
+
+        fetch('https://@ViewBag.Address/api/account/check', { credentials: "include" })
+            .then(res => {
+                if (res.status == 401) {
+                    window.topApp.loading = false;
+                    window.topApp.switchTab(0);
+                }
+                else
+                    res.json().then(r => {
+                        window.topApp.unauth = false;
+                        window.topApp.loading = false;
+                        if (r.accessLevel == 3) {
+                            window.topApp.isAdmin = true;
+                            window.topApp.switchTab(2);
+                            window.bodyApp.load();
+                        }
+                        else
+                            window.topApp.switchTab(1);
+                    })
+            })
+
     </script>
 </body>
 </html>
