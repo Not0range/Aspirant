@@ -1,10 +1,10 @@
-Для запуска нужен самозаверенный сертификат
-В PowerShell запустить по порядку
-$cert = New-SelfSignedCertificate -DnsName @("aspirant.test", "www.aspirant.test") -CertStoreLocation "cert:\LocalMachine\My"
-$certKeyPath = "c:\certs\aspirant.test.pfx"
-$password = ConvertTo-SecureString 'password' -AsPlainText -Force
-$cert | Export-PfxCertificate -FilePath $certKeyPath -Password $password
-$rootCert = $(Import-PfxCertificate -FilePath $certKeyPath -CertStoreLocation 'Cert:\LocalMachine\Root' -Password $password)
+Для запуска нужен самозаверенный сертификат<br>
+В PowerShell запустить по порядку<br>
+$cert = New-SelfSignedCertificate -DnsName @("aspirant.test", "www.aspirant.test") -CertStoreLocation "cert:\LocalMachine\My"<br>
+$certKeyPath = "c:\certs\aspirant.test.pfx"<br>
+$password = ConvertTo-SecureString 'password' -AsPlainText -Force<br>
+$cert | Export-PfxCertificate -FilePath $certKeyPath -Password $password<br>
+$rootCert = $(Import-PfxCertificate -FilePath $certKeyPath -CertStoreLocation 'Cert:\LocalMachine\Root' -Password $password)<br>
 
 Папку certs в C <u>не удалять!!!</u>
 Запускать пока из студии
