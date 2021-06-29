@@ -13,7 +13,7 @@
       "commandName": "Project",
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:/certs/aspirant.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:\\certs\\aspirant.test.pfx",
         "ASPNETCORE_Kestrel__Certificates__Default__Password": "password",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

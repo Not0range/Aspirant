@@ -3,7 +3,7 @@
 @{
     ViewBag.Title = "Главная";
     Layout = "_Layout";
-    ViewBag.Address = "127.0.0.1:5001";
+    ViewBag.Address = "localhost:5001";
 }
 
 <div id="content-div">
@@ -32,18 +32,10 @@
                  selectable
                  primary-key="id"
                  @@row-selected="onPersonRowSelected">
-            <template #cell(selectedPerson)="{ rowSelected }">
-                <template v-if="rowSelected">
-                    <span aria-hidden="true">&check;</span>
-                </template>
-                <template v-else>
-                    <span aria-hidden="true">&nbsp;</span>
-                </template>
-            </template>
         </b-table>
     </div>
     <div class="tab-div" :style="{display: activeTab != 3 ? 'none' : ''}">
-        <h1>Данные об абитуриенте</h1>
+        <h1>Специальности, выбранные для поступления</h1>
         <div v-if="abiturient !== null" style="display: flex; flex-wrap: wrap;">
             <div v-for="a in abiturient.specialties.map(i => i)" class="abitur-spec">
                 <p>Факультет: {{getSpecialty(a).faculty}}</p>
@@ -53,15 +45,315 @@
         </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 4 ? 'none' : ''}">
-        <h1>Вступительные экзамены</h1>
+        <h1>Расписание и результаты вступительных экзаменов</h1>
+        <div v-if="entryExam.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="e in entryExam" class="abitur-spec">
+                <p>Специальность: {{specialties.find(i => e.specialtyId).title}}</p>
+                <p>Предмет: {{e.subject}}</p>
+                <p>Дата: {{e._date}}</p>
+                <p>Результат: {{e.result}}</p>
+                <input type="button" @@click="" value="Выставить результат" />
+            </div>
+        </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 5 ? 'none' : ''}">
         <h1>Данные аспиранта</h1>
+        <div v-if="aspirant !== null">
+            <p>Изучаемый язык: {{aspirant.foreignLanguage}}</p>
+            <p>Форма обучения: {{aspirant.enducationForm}}</p>
+            <p>Направление обучения: {{aspirant.enducationDirection}}</p>
+            <p>Специальность: {{specialties.find(i => aspirant.specialtyId).title}}</p>
+            <p>Приказ: {{aspirant.decree}}</p>
+            <p>Тема диссертации: {{aspirant.dissertationTheme}}</p>
+            <p>
+                Руководитель: {{teachers.find(i => i.id == aspirant.teacherId).lastname}}
+                {{teachers.find(i => i.id == aspirant.teacherId).firstname[0]}}. {{teachers.find(i => i.id == aspirant.teacherId).patronymic[0]}}.
+            </p>
+            <input type="button" @@click="" value="Редактировать" />
+        </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 6 ? 'none' : ''}">
-        <h1>Зачёты/экзаменыа</h1>
+        <h1>Расписание и результаты зачётов/экзаменов</h1>
+        <div v-if="exam.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="e in exam" class="abitur-spec">
+                <p>Специальность: {{specialties.find(i => e.specialtyId).title}}</p>
+                <p>Предмет: {{e.subject}}</p>
+                <p>Тип: {{e.examType == 0 ? 'Зачёт' : e.examType == 1 ? 'Зачёт с оценкой' : 'Экзамен'}}</p>
+                <p>
+                    Преподаватель: {{teachers.find(i => i.id == e.teacherId).lastname}}
+                    {{teachers.find(i => i.id == e.teacherId).firstname[0]}}. {{teachers.find(i => i.id == e.teacherId).patronymic[0]}}.
+                </p>
+                <p>Дата: {{e._date}}</p>
+                <p>Результат: {{e.result}}</p>
+                <input type="button" @@click="" value="Выставить результат"/>
+            </div>
+        </div>
     </div>
     <div class="tab-div" :style="{display: activeTab != 7 ? 'none' : ''}">
+        <h1>Авторефераты</h1>
+        <div v-if="abstracts.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="a in abstracts" class="abitur-spec">
+                <div v-if="a.state == 0">
+                    <p>Добавлено, неутверждено</p>
+                    <p>Тема реферата: {{a.subjectEdit}}</p>
+                    <p>Дата и время: {{a._dateTimeEdit}}</p>
+                    <p>Место: {{a.placeEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="a.state == 1">
+                    <p>Изменено, неутверждено</p>
+                    <p>Тема реферата: {{a.subject}} -> {{a.subjectEdit}}</p>
+                    <p>Дата и время: {{a._dateTime}} -> {{a._dateTimeEdit}}</p>
+                    <p>Место: {{a.place}} -> {{a.placeEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="a.state == 2">
+                    <p>Тема реферата: {{a.subject}}</p>
+                    <p>Дата и время: {{a._dateTime}}</p>
+                    <p>Место: {{a.place}}</p>
+                </div>
+                <div v-else>
+                    <p>Возвращено по причине: {{a.reason}}</p>
+                    <p>Тема реферата: {{a.subjectEdit}}</p>
+                    <p>Дата и время: {{a._dateTimeEdit}}</p>
+                    <p>Место: {{a.placeEdit}}</p>
+                    <input type="button" @@click="" value="Удалить" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 8 ? 'none' : ''}">
+        <h1>Конференции</h1>
+        <div v-if="conferences.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="c in conferences" class="abitur-spec">
+                <div v-if="c.state == 0">
+                    <p>Добавлено, неутверждено</p>
+                    <p>Тема конференции: {{c.subjectEdit}}</p>
+                    <p>Дата и время: {{c._dateTimeEdit}}</p>
+                    <p>Место: {{c.placeEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="c.state == 1">
+                    <p>Изменено, неутверждено</p>
+                    <p>Тема конференции: {{c.subject}} -> {{c.subjectEdit}}</p>
+                    <p>Дата и время: {{c._dateTime}} -> {{c._dateTimeEdit}}</p>
+                    <p>Место: {{c.place}} -> {{c.placeEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="c.state == 2">
+                    <p>Тема конференции: {{c.subject}}</p>
+                    <p>Дата и время: {{c._dateTime}}</p>
+                    <p>Место: {{c.place}}</p>
+                </div>
+                <div v-else>
+                    <p>Возвращено по причине: {{c.reason}}</p>
+                    <p>Тема конференции: {{c.subjectEdit}}</p>
+                    <p>Дата и время: {{c._dateTimeEdit}}</p>
+                    <p>Место: {{c.placeEdit}}</p>
+                    <input type="button" @@click="" value="Удалить" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 9 ? 'none' : ''}">
+        <h1>Публикации</h1>
+        <div v-if="publications.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="c in publications" class="abitur-spec">
+                <div v-if="c.state == 0">
+                    <p>Добавлено, неутверждено</p>
+                    <p>Тема публикации: {{c.subjectEdit}}</p>
+                    <p>Дата: {{c._dateEdit}}</p>
+                    <p>Журнал: {{c.journalEdit}}</p>
+                    <p>Номер: {{c.numberEdit}}</p>
+                    <p>Страница: {{c.pageEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="c.state == 1">
+                    <p>Изменено, неутверждено</p>
+                    <p>Тема публикации: {{c.subject}} -> {{c.subjectEdit}}</p>
+                    <p>Дата: {{c._date}} -> {{c._dateEdit}}</p>
+                    <p>Журнал: {{c.journal}} -> {{c.journalEdit}}</p>
+                    <p>Номер: {{c.number}} -> {{c.numberEdit}}</p>
+                    <p>Страница: {{c.page}} -> {{c.pageEdit}}</p>
+                    <div>
+                        <input type="button" @@click="" value="Утвердить" />
+                        <input type="button" @@click="" value="Вернуть" />
+                        <input type="button" @@click="" value="Удалить" />
+                    </div>
+                </div>
+                <div v-else-if="c.state == 2">
+                    <p>Тема публикации: {{c.subject}}</p>
+                    <p>Дата: {{c._date}}</p>
+                    <p>Журнал: {{c.journal}}</p>
+                    <p>Номер: {{c.number}}</p>
+                    <p>Страница: {{c.page}}</p>
+                </div>
+                <div v-else>
+                    <p>Возвращено по причине: {{c.reason}}</p>
+                    <p>Тема публикации: {{c.subjectEdit}}</p>
+                    <p>Дата: {{c._dateEdit}}</p>
+                    <p>Журнал: {{c.journalEdit}}</p>
+                    <p>Номер: {{c.numberEdit}}</p>
+                    <p>Страница: {{c.pageEdit}}</p>
+                    <input type="button" @@click="" value="Удалить" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 10 ? 'none' : ''}">
+        <h1>Расписание и результаты кандидатских экзаменов</h1>
+        <div v-if="candidateExam.length > 0" style="display: flex; flex-wrap: wrap;">
+            <div v-for="e in candidateExam" class="abitur-spec">
+                <p>Специальность: {{specialties.find(i => e.specialtyId).title}}</p>
+                <p>Предмет: {{e.subject}}</p>
+                <p>Дата: {{e._date}}</p>
+                <p>Результат: {{e.result}}</p>
+                <input type="button" @@click="" value="Выставить результат" />
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 11 ? 'none' : ''}">
+        <h1>Предзащита</h1>
+        <div v-if="prelProtection.length > 0" style="display: flex; flex-wrap: wrap; flex-direction: column">
+            <div v-for="p in prelProtection" class="protection">
+                <div style="flex-grow: 1">
+                    <p>Дата и время: {{p._dateTime}}</p>
+                    <p>Комиссия:</p>
+                    <p v-for="t in p.commission.split(' ').map(i => teachers.find(p => p.id == i))">
+                        {{`${t.rank} ${t.lastname} ${t.firstname[0]}. ${t.patronymic[0]}.`}}
+                    </p>
+                </div>
+                <div style="font-size: 32px;display: flex; align-items: center;">
+                    <p style="margin-left: 5px;">{{p.allowmance ? 'К защите допущен' : 'К защите недопущен'}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 12 ? 'none' : ''}">
+        <h1>Защита</h1>
+        <div v-if="protection.length > 0" style="display: flex; flex-wrap: wrap; flex-direction: column">
+            <div v-for="p in protection" class="protection">
+                <div style="flex-grow: 1">
+                    <p>Дата и время: {{p._dateTime}}</p>
+                    <p>Место защиты: {{p.city}}</p>
+                    <p>Университет: {{p.university}}</p>
+                    <p>Комиссия: {{p.commission}}</p>
+                </div>
+                <div style="font-size: 32px;display: flex; align-items: center;">
+                    <p style="margin-left: 5px;">Результат: {{p.result}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 13 ? 'none' : ''}">
+        <h1>Перечень вступительных экзаменов</h1>
+        <b-table :items="listEntryExams"
+                 :fields="[{
+                    key: 'subject',
+                    sortable: true,
+                    label: 'Предмет'
+                 },
+                 {
+                    key: 'specialty',
+                    sortable: true,
+                    label: 'Специальность'
+                 },
+                 {
+                    key: '_date',
+                    sortable: true,
+                    label: 'Дата'
+                 },]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onEntryExamRowSelected">
+        </b-table>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 14 ? 'none' : ''}">
+        <h1>Перечень зачётов и экзаменов</h1>
+        <b-table :items="listExams"
+                 :fields="[{
+                    key: 'subject',
+                    sortable: true,
+                    label: 'Предмет'
+                 },
+                 {
+                    key: 'specialty',
+                    sortable: true,
+                    label: 'Специальность'
+                 },
+                 {
+                    key: 'type',
+                    sortable: true,
+                    label: 'Тип'
+                 },
+                 {
+                    key: '_date',
+                    sortable: true,
+                    label: 'Дата'
+                 },
+                 {
+                    key: 'teacher',
+                    sortable: true,
+                    label: 'Преподаватель'
+                 },]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onExamRowSelected">
+        </b-table>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 15 ? 'none' : ''}">
+        <h1>Перечень кандидатских экзаменов</h1>
+        <b-table :items="listCandidateExams"
+                 :fields="[{
+                    key: 'subject',
+                    sortable: true,
+                    label: 'Предмет'
+                 },
+                 {
+                    key: 'specialty',
+                    sortable: true,
+                    label: 'Специальность'
+                 },
+                 {
+                    key: '_date',
+                    sortable: true,
+                    label: 'Дата'
+                 },]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onCandidateExamRowSelected">
+        </b-table>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 16 ? 'none' : ''}">
         <h1>Список преподавателей</h1>
         <b-table :items="teachers"
                  :fields="teacherFields"
@@ -81,6 +373,69 @@
             </template>
         </b-table>
     </div>
+    <div class="tab-div" :style="{display: activeTab != 17 ? 'none' : ''}">
+        <h1>Факультеты</h1>
+        <b-table :items="faculties"
+                 :fields="[{
+                    key: 'title',
+                    sortable: true,
+                    label: 'Факультет'
+                 }]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onFacultyRowSelected">
+        </b-table>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 18 ? 'none' : ''}">
+        <h1>Кафедры</h1>
+        <b-table :items="cathedras"
+                 :fields="[{
+                    key: 'title',
+                    sortable: true,
+                    label: 'Кафедра'
+                 },
+                 {
+                    key: 'faculty',
+                    sortable: true,
+                    label: 'Факультет'
+                 }]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onCathedraRowSelected">
+        </b-table>
+    </div>
+    <div class="tab-div" :style="{display: activeTab != 19 ? 'none' : ''}">
+        <h1>Специальности</h1>
+        <b-table :items="specialties"
+                 :fields="[{
+                    key: 'title',
+                    sortable: true,
+                    label: 'Специальность'
+                 },
+                 {
+                    key: 'cathedra',
+                    sortable: true,
+                    label: 'Кафедра'
+                 },
+                 {
+                    key: 'faculty',
+                    sortable: true,
+                    label: 'Факультет'
+                 }]"
+                 select-mode="single"
+                 responsive="sm"
+                 ref="selectableTable"
+                 selectable
+                 primary-key="id"
+                 @@row-selected="onCathedraRowSelected">
+        </b-table>
+    </div>
 </div>
 <script>
     window.bodyApp = new Vue({
@@ -89,8 +444,11 @@
             activeTab: -1,
 
             faculties: [],
+            selectedFaculty: [],
             cathedras: [],
+            selectedCathedra: [],
             specialties: [],
+            selectedSpecialty:[],
 
             personFields: [
                 {
@@ -180,7 +538,25 @@
 
             person: [],
             teacher: [],
-            abiturient: null
+            abiturient: null,
+            entryExam: [],
+            aspirant: null,
+            exam: [],
+            candidateExam: [],
+
+            abstracts: [],
+            conferences: [],
+            publications: [],
+
+            prelProtection: [],
+            protection: [],
+
+            listEntryExams: [],
+            selectedEntryExam: [],
+            listExams: [],
+            selectedExam: [],
+            listCandidateExams:[],
+            selectedCandidateExam: [],
         },
         methods: {
             openLoginForm() {
@@ -189,14 +565,8 @@
             onPersonRowSelected(items) {
                 this.selectedPerson = items;
                 if (this.selectedPerson.length > 0) {
-                    window.topApp.personSelected = true;
-                    fetch(`https://@ViewBag.Address/api/abiturient/list`, { credentials: "include" })
-                        .then(res => {
-                            if (res.status == 200) {
-                                res.json().then(r =>
-                                    this.abiturient = r.find(i => i.personId == this.selectedPerson[0].id))
-                            }
-                        })
+                    this.getAbiturient();
+                    this.getAspirant();
                 }
                 else {
                     window.topApp.personSelected = false;
@@ -207,51 +577,8 @@
                 this.selectedTeacher = items;
             },
             load() {
-                fetch(`https://@ViewBag.Address/api/person/list`, { credentials: "include" })
-                    .then(res => {
-                        if (res.status == 200)
-                            res.json().then(r => {
-                                window.bodyApp.persons = r.map(i => {
-                                    i.book = i.workbook ? 'В наличии' : 'Отсутствует';
-                                    i.birth = `${new Date(Date.parse(i.birthdate)).getDate().toString().length == 1 ? '0' :
-                                        ''}${new Date(Date.parse(i.birthdate)).getDate()}.` +
-                                        `${(new Date(Date.parse(i.birthdate)).getMonth() + 1).toString().length == 1 ? '0' :
-                                            ''}${new Date(Date.parse(i.birthdate)).getMonth() + 1}.` +
-                                        `${new Date(Date.parse(i.birthdate)).getFullYear()}`;
-                                    return i;
-                                });
-                            });
-                    });
-                fetch(`https://@ViewBag.Address/api/faculty/list`, { credentials: "include" })
-                    .then(res => {
-                        if (res.status == 200)
-                            res.json().then(r => this.faculties = r);
-                    });
-                fetch(`https://@ViewBag.Address/api/cathedra/list`, { credentials: "include" })
-                    .then(res => {
-                        if (res.status == 200)
-                            res.json().then(r => this.cathedras = r);
-                    });
-                fetch(`https://@ViewBag.Address/api/specialty/list`, { credentials: "include" })
-                    .then(res => {
-                        if (res.status == 200)
-                            res.json().then(r => this.specialties = r);
-                    });
-                fetch(`https://@ViewBag.Address/api/teacher/list`, { credentials: "include" })
-                    .then(res => {
-                        if (res.status == 200)
-                            res.json().then(r => {
-                                window.bodyApp.teachers = r.map(i => {
-                                    i.cathedra = this.cathedras.find(c => c.id == i.cathedraId).title;
-                                    i.birth = `${new Date(Date.parse(i.birthDate)).getDate().toString().length == 1 ? '0' :
-                                        ''}${new Date(Date.parse(i.birthDate)).getDate()}.` +
-                                        `${(new Date(Date.parse(i.birthDate)).getMonth() + 1).toString().length == 1 ? '0' :
-                                            ''}${new Date(Date.parse(i.birthDate)).getMonth() + 1}.` +
-                                        `${new Date(Date.parse(i.birthDate)).getFullYear()}`;
-                                    return i;
-                                });
-                            });
-                    });
+                this.getPersons();
+                this.getFaculties();
             },
             getSpecialty(id) {
                 let s = this.specialties.find(i => i.id == id);
@@ -262,6 +589,338 @@
                     cathedra: c.title,
                     faculty: f.title
                 }
+            },
+            getPersons() {
+                fetch(`https://@ViewBag.Address/api/person/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => {
+                                window.bodyApp.persons = r.map(i => {
+                                    i.book = i.workbook ? 'В наличии' : 'Отсутствует';
+                                    i.birth = `${moment(i.birthDate).format('DD.MM.yyyy')}`;
+                                    return i;
+                                });
+                            });
+                    });
+            },
+            getFaculties() {
+                fetch(`https://@ViewBag.Address/api/faculty/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => this.faculties = r);
+                            this.getCathedras();
+                        }
+                    });
+            },
+            getCathedras() {
+                fetch(`https://@ViewBag.Address/api/cathedra/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => i.faculty = this.faculties.find(f => f.id == i.facultyId).title);
+                                this.cathedras = r;
+                                this.getSpecialties();
+                            });
+                        }
+                    });
+            },
+            getSpecialties() {
+                fetch(`https://@ViewBag.Address/api/specialty/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => {
+                                    i.cathedra = this.cathedras.find(c => c.id == i.cathedraId).title;
+                                    i.faculty = this.faculties.find(f =>
+                                        f.id == this.cathedras.find(c => c.id == i.cathedraId).facultyId).title;
+                                });
+                                this.specialties = r;
+                                this.getTeachers();
+                            });
+                        }
+                    });
+            },
+            getTeachers() {
+                fetch(`https://@ViewBag.Address/api/teacher/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(r => {
+                                window.bodyApp.teachers = r.map(i => {
+                                    i.cathedra = this.cathedras.find(c => c.id == i.cathedraId).title;
+                                    i.birth = `${moment(i.birthDate).format('DD.MM.yyyy')}`;
+                                    return i;
+                                });
+                                this.getEntryExamsList();
+                                this.getExamsList();
+                                this.getCandidateExamsList();
+                            });
+                    });
+            },
+            getAbiturient() {
+                fetch(`https://@ViewBag.Address/api/abiturient/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                this.abiturient = r.find(i => i.personId == this.selectedPerson[0].id);
+                                window.topApp.personSelected = true;
+
+                                this.getEntryExam();
+                                });
+                            };
+                        });
+            },
+            getEntryExam() {
+                fetch(`https://@ViewBag.Address/api/entryexam/list`, { credentials: "include" })
+                    .then(res1 => {
+                        if (res1.status == 200)
+                            res1.json().then(exams => {
+                                fetch(`https://@ViewBag.Address/api/passingentryexam/list?id=${this.abiturient.id}`, { credentials: "include" })
+                                    .then(res2 => {
+                                        if (res2.status == 200)
+                                            res2.json().then(pas => {
+                                                exams.forEach(i => {
+                                                    i._date = moment(i.date).format('DD.MM.yyyy');
+                                                    let t = pas.find(j => j.examId == i.id);
+                                                    if (t)
+                                                        i.result = t.result;
+                                                    else
+                                                        i.result = '--';
+                                                });
+                                                this.entryExam = exams;
+                                            })
+                                    })
+                            })
+                    })
+            },
+            getAspirant() {
+                fetch(`https://@ViewBag.Address/api/aspirant/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                this.aspirant = r.find(i => i.personId == this.selectedPerson[0].id);
+                                this.getExam();
+                                this.getCandidateExam();
+                                this.getPrelProtection();
+                                this.getProtection();
+                                this.getAbstracts();
+                                this.getConferences();
+                                this.getPublications();
+                                });
+                            };
+                        });
+            },
+            getExam() {
+                fetch(`https://@ViewBag.Address/api/exam/list`, { credentials: "include" })
+                    .then(res1 => {
+                        if (res1.status == 200)
+                            res1.json().then(exams => {
+                                fetch(`https://@ViewBag.Address/api/passingexam/list?id=${this.abiturient.id}`, { credentials: "include" })
+                                    .then(res2 => {
+                                        if (res2.status == 200)
+                                            res2.json().then(pas => {
+                                                exams.forEach(i => {
+                                                    i._date = moment(i.date).format('DD.MM.yyyy');
+                                                    let t = pas.find(j => j.examId == i.id);
+                                                    if (t)
+                                                        i.result = t.result;
+                                                    else
+                                                        i.result = '--';
+                                                });
+                                                this.exam = exams;
+                                            })
+                                    })
+                            })
+                    })
+            },
+            getCandidateExam() {
+                fetch(`https://@ViewBag.Address/api/candidateexam/list`, { credentials: "include" })
+                    .then(res1 => {
+                        if (res1.status == 200)
+                            res1.json().then(exams => {
+                                fetch(`https://@ViewBag.Address/api/passingcandidateexam/list?id=${this.abiturient.id}`, { credentials: "include" })
+                                    .then(res2 => {
+                                        if (res2.status == 200)
+                                            res2.json().then(pas => {
+                                                exams.forEach(i => {
+                                                    i._date = moment(i.date).format('DD.MM.yyyy');
+                                                    let t = pas.find(j => j.examId == i.id);
+                                                    if (t)
+                                                        i.result = t.result;
+                                                    else
+                                                        i.result = '--';
+                                                });
+                                                this.candidateExam = exams;
+                                            })
+                                    })
+                            })
+                    })
+            },
+            getAbstracts() {
+                fetch(`https://@ViewBag.Address/api/abstract/list?id=${this.aspirant.id}`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => {
+                                    i._dateTime = moment(i.dateTime).format('DD.MM.yyyy HH:mm');
+                                    if (i.dateTimeEdit != null)
+                                        i._dateTimeEdit = moment(i.dateTimeEdit).format('DD.MM.yyyy HH:mm');
+                                    if (i.subject == i.subjectEdit && i.dateTime == i.dateTimeEdit &&
+                                        i.place == i.placeEdit && i.reason == null)
+                                        i.state = 0;
+                                    else if (i.reason == null && (i.subjectEdit != null ||
+                                        i.dateTimeEdit != null || i.placeEdit != null))
+                                        i.state = 1;
+                                    else if (i.reason == null && i.subjectEdit == null &&
+                                        i.dateTimeEdit == null && i.placeEdit == null)
+                                        i.state = 2;
+                                    else
+                                        i.state = 3;
+                                });
+                                this.abstracts = r;
+                                });
+                            };
+                        });
+            },
+            getConferences() {
+                fetch(`https://@ViewBag.Address/api/conference/list?id=${this.aspirant.id}`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => {
+                                    i._dateTime = moment(i.dateTime).format('DD.MM.yyyy HH:mm');
+                                    if (i.dateTimeEdit != null)
+                                        i._dateTimeEdit = moment(i.dateTimeEdit).format('DD.MM.yyyy HH:mm');
+                                    if (i.subject == i.subjectEdit && i.dateTime == i.dateTimeEdit &&
+                                        i.place == i.placeEdit && i.reason == null)
+                                        i.state = 0;
+                                    else if (i.reason == null && (i.subjectEdit != null ||
+                                        i.dateTimeEdit != null || i.placeEdit != null))
+                                        i.state = 1;
+                                    else if (i.reason == null && i.subjectEdit == null &&
+                                        i.dateTimeEdit == null && i.placeEdit == null)
+                                        i.state = 2;
+                                    else
+                                        i.state = 3;
+                                });
+                                this.conferences = r;
+                                });
+                            };
+                        });
+            },
+            getPublications() {
+                fetch(`https://@ViewBag.Address/api/publication/list?id=${this.aspirant.id}`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => {
+                                    i._date = moment(i.date).format('DD.MM.yyyy');
+                                    if (i.dateEdit != null)
+                                        i._dateEdit = moment(i.dateEdit).format('DD.MM.yyyy');
+                                    if (i.subject == i.subjectEdit && i.date == i.dateEdit &&
+                                        i.journal == i.journalEdit && i.number == i.numberEdit &&
+                                        i.page == i.pageEdit && i.reason == null)
+                                        i.state = 0;
+                                    else if (i.reason == null && (i.subjectEdit != null ||
+                                        i.dateEdit != null || i.journalEdit != null ||
+                                        i.numberEdit != null || i.pageEdit != null))
+                                        i.state = 1;
+                                    else if (i.reason == null && i.subjectEdit == null &&
+                                        i.dateEdit == null && i.journalEdit == null &&
+                                        i.numberEdit == null && i.pageEdit == null)
+                                        i.state = 2;
+                                    else
+                                        i.state = 3;
+                                });
+                                this.publications = r;
+                                });
+                            };
+                        });
+            },
+            getPrelProtection() {
+                fetch(`https://@ViewBag.Address/api/prelprotection/list?id=${this.aspirant.id}`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => i._dateTime = moment(i.dateTime).format('DD.MM.yyyy HH:mm'));
+                                this.prelProtection = r;
+                                });
+                            };
+                        });
+            },
+            getProtection() {
+                fetch(`https://@ViewBag.Address/api/protection/list?id=${this.aspirant.id}`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200) {
+                            res.json().then(r => {
+                                r.forEach(i => i._dateTime = moment(i.dateTime).format('DD.MM.yyyy HH:mm'));
+                                this.protection = r;
+                                });
+                            };
+                        });
+            },
+
+
+            onFacultyRowSelected(items) {
+                this.selectedFaculty = items;
+            },
+            onCathedraRowSelected(items) {
+                this.selectedCathedra = items;
+            },
+            onSpecialtyRowSelected(items) {
+                this.selectedSpecialty = items;
+            },
+
+            getEntryExamsList() {
+                fetch(`https://@ViewBag.Address/api/entryexam/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(exams => {
+                                exams.forEach(i => {
+                                    i._date = `${moment(i.date).format('DD.MM.yyyy')}`
+                                    i.specialty = this.specialties.find(s => s.id == i.specialtyId).title
+                                });
+                                this.listEntryExams = exams;
+                            });
+                    })
+            },
+            getExamsList() {
+                fetch(`https://@ViewBag.Address/api/exam/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(exams => {
+                                exams.forEach(i => {
+                                    i._date = `${moment(i.date).format('DD.MM.yyyy')}`
+                                    i.specialty = this.specialties.find(s => s.id == i.specialtyId).title;
+                                    i.type = i.examType == 0 ? 'Зачёт' : i.examType == 1 ? 'Зачёт с оценкой' : 'Экзамен';
+                                    i.teacher = `${this.teachers.find(t => t.id == i.teacherId).lastname} ` +
+                                        `${this.teachers.find(t => t.id == i.teacherId).firstname[0]}. ` +
+                                        `${this.teachers.find(t => t.id == i.teacherId).patronymic[0]}.`
+                                });
+                                this.listExams = exams;
+                            });
+                    })
+            },
+            getCandidateExamsList() {
+                fetch(`https://@ViewBag.Address/api/candidateexam/list`, { credentials: "include" })
+                    .then(res => {
+                        if (res.status == 200)
+                            res.json().then(exams => {
+                                exams.forEach(i => {
+                                    i._date = `${moment(i.date).format('DD.MM.yyyy')}`
+                                    i.specialty = this.specialties.find(s => s.id == i.specialtyId).title
+                                });
+                                this.listCandidateExams = exams;
+                            });
+                    })
+            },
+            onEntryExamRowSelected(items) {
+                this.selectedEntryExam = items;
+            },
+            onExamRowSelected(items) {
+                this.selectedExam = items;
+            },
+            onCandidateExamRowSelected(items) {
+                this.selectedCandidateExam = items;
             }
         },
         computed: {

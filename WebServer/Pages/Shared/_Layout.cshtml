@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Address = "127.0.0.1:5001";
+    ViewBag.Address = "localhost:5001";
 }
 <!DOCTYPE html>
 <html>
@@ -12,6 +12,7 @@
     <script src="~/js/bootstrap-vue.js"></script>
     <script src="~/js/popper.min.js"></script>
     <script src="~/js/portal-vue.umd.min.js"></script>
+    <script src="~/js/moment.min.js"></script>
 
     <style>
         body {
@@ -72,7 +73,7 @@
             color: black;
             text-align: left;
             border: 0 !important;
-            width: 100%;
+            width: 90%;
         }
 
         .menu-aspirant-elem {
@@ -97,13 +98,26 @@
             display: none;
         }
 
-        .abitur-spec{
+        .abitur-spec {
             border-style: solid;
             border-radius: 5px;
             padding: 5px;
+            margin: 5px;
         }
 
-        .abitur-spec p{
+        .abitur-spec p {
+            margin: 0px;
+        }
+
+        .protection{
+            display: flex;
+            border-style: solid;
+            border-width: 1px;
+            margin: 5px;
+            border-radius: 10px
+        }
+
+        .protection p {
             margin: 0px;
         }
     </style>
@@ -113,16 +127,37 @@
         <div id="main-div">
             <div id="top-menu">
                 <b-sidebar v-model:visible="leftMenu" title="Меню" backdrop shadow>
-                    <b-button class="menu-elem-button" @@click="switchTab(2)">Список зарегистрированных аспирантов</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                    <b-button class="menu-elem-button" @@click="switchTab(2)">Список зарегистрированных физ. лиц</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
                               @@click="switchTab(3)" :disabled="!personSelected">Данные об абитуриенте</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                    <b-button class="menu-elem-button menu-aspirant-elem"
                               @@click="switchTab(4)" :disabled="!personSelected">Данные о вступительных экзаменах</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                    <b-button class="menu-elem-button menu-aspirant-elem"
                               @@click="switchTab(5)" :disabled="!personSelected">Данные об аспиранте</b-button>
-                    <b-button class="menu-elem-button menu-aspirant-elem" 
+                    <b-button class="menu-elem-button menu-aspirant-elem"
                               @@click="switchTab(6)" :disabled="!personSelected">Экзамены/зачёты</b-button>
-                    <b-button class="menu-elem-button" @@click="switchTab(7)">Список преподавателей</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(7)" :disabled="!personSelected">Авторефераты</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(8)" :disabled="!personSelected">Конференции</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(9)" :disabled="!personSelected">Публикации</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(10)" :disabled="!personSelected">Кандидатские экзамены</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(11)" :disabled="!personSelected">Предзащита</b-button>
+                    <b-button class="menu-elem-button menu-aspirant-elem"
+                              @@click="switchTab(12)" :disabled="!personSelected">Защита</b-button>
+                    <b-button class="menu-elem-button"
+                              @@click="switchTab(13)">Перечень вступительных экзаменов</b-button>
+                    <b-button class="menu-elem-button"
+                              @@click="switchTab(14)">Перечень зачётов и экзаменов</b-button>
+                    <b-button class="menu-elem-button"
+                              @@click="switchTab(15)">Перечень кандидатских экзаменов</b-button>
+                    <b-button class="menu-elem-button" @@click="switchTab(16)">Список преподавателей</b-button>
+                    <b-button class="menu-elem-button" @@click="switchTab(17)">Список факультетов</b-button>
+                    <b-button class="menu-elem-button" @@click="switchTab(18)">Список кафедр</b-button>
+                    <b-button class="menu-elem-button" @@click="switchTab(19)">Список специальностей</b-button>
                 </b-sidebar>
                 <b-modal header="Вход" id="login-form" v-model="loginForm" centered>
                     <template #modal-title>
